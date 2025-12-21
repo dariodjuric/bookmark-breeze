@@ -4,7 +4,15 @@
   "version": "1.0.0",
   "description": "A beautiful bookmark manager with drag-and-drop support",
   "permissions": ["bookmarks"],
-  "action": {},
+  "action": {
+    "default_icon": "icon.svg"
+  },
+  "icons": {
+    "16": "icon.svg",
+    "32": "icon.svg",
+    "48": "icon.svg",
+    "128": "icon.svg"
+  },
   "background": {
     "service_worker": "src/background.ts",
     "type": "module"
