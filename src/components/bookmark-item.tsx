@@ -25,6 +25,9 @@ interface BookmarkItemProps {
   onDragEnd: () => void;
   isDragOver: boolean;
   dragOverId: string | null;
+  editingId: string | null;
+  onSetEditingId: (id: string | null) => void;
+  onHover: (id: string | null) => void;
 }
 
 export function BookmarkItem({
@@ -37,21 +40,40 @@ export function BookmarkItem({
   onDrop,
   onDragEnd,
   dragOverId,
+  editingId,
+  onSetEditingId,
+  onHover,
 }: BookmarkItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(bookmark.title);
   const [editUrl, setEditUrl] = useState(bookmark.url || "");
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Check if this is a root folder that can't be edited/deleted
   const isRoot = isRootFolder(bookmark.id);
+  const isEditing = editingId === bookmark.id;
 
   useEffect(() => {
-    if (isEditing && titleInputRef.current) {
-      titleInputRef.current.focus();
+    if (isEditing) {
+      // Use setTimeout to ensure the input is rendered before focusing
+      const timer = setTimeout(() => {
+        if (titleInputRef.current) {
+          titleInputRef.current.focus();
+          const len = titleInputRef.current.value.length;
+          titleInputRef.current.setSelectionRange(len, len);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isEditing]);
+
+  // Reset edit values when entering edit mode
+  useEffect(() => {
+    if (isEditing) {
+      setEditTitle(bookmark.title);
+      setEditUrl(bookmark.url || "");
+    }
+  }, [isEditing, bookmark.title, bookmark.url]);
 
   const handleSave = () => {
     if (isRoot) return;
@@ -59,19 +81,18 @@ export function BookmarkItem({
       title: editTitle,
       url: bookmark.isFolder ? undefined : editUrl,
     });
-    setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditTitle(bookmark.title);
-    setEditUrl(bookmark.url || "");
-    setIsEditing(false);
+    onSetEditingId(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      e.stopPropagation();
       handleSave();
     } else if (e.key === "Escape") {
+      e.stopPropagation();
       handleCancel();
     }
   };
@@ -94,6 +115,8 @@ export function BookmarkItem({
         onDragOver={(e) => onDragOver(e, bookmark)}
         onDrop={(e) => onDrop(e, bookmark)}
         onDragEnd={onDragEnd}
+        onMouseEnter={() => onHover(bookmark.id)}
+        onMouseLeave={() => onHover(null)}
       >
         {!isRoot && (
           <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
@@ -157,7 +180,7 @@ export function BookmarkItem({
           </div>
         ) : (
           <button
-            onClick={() => !isRoot && setIsEditing(true)}
+            onClick={() => !isRoot && onSetEditingId(bookmark.id)}
             className={cn(
               "flex flex-1 items-center gap-2 text-left min-w-0",
               !isRoot && !bookmark.isFolder && "cursor-pointer",
@@ -203,6 +226,9 @@ export function BookmarkItem({
               onDragEnd={onDragEnd}
               isDragOver={dragOverId === child.id}
               dragOverId={dragOverId}
+              editingId={editingId}
+              onSetEditingId={onSetEditingId}
+              onHover={onHover}
             />
           ))}
         </div>

@@ -19,11 +19,27 @@ export function BookmarkTree() {
   const [error, setError] = useState<string | null>(null)
   const [draggedBookmark, setDraggedBookmark] = useState<Bookmark | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Load bookmarks on mount
   useEffect(() => {
     loadBookmarks()
   }, [])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setEditingId(null)
+      } else if (e.key === 'Enter' && !editingId && hoveredId && !isRootFolder(hoveredId)) {
+        e.preventDefault()
+        setEditingId(hoveredId)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [editingId, hoveredId])
 
   const loadBookmarks = async (showLoading = true) => {
     try {
@@ -59,6 +75,7 @@ export function BookmarkTree() {
           title: updates.title,
           url: updates.url,
         })
+        setEditingId(null)
         await loadBookmarks(false)
       } catch (err) {
         console.error('Failed to update bookmark:', err)
@@ -183,7 +200,7 @@ export function BookmarkTree() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-destructive">
         <p>Error: {error}</p>
-        <Button variant="outline" className="mt-4" onClick={loadBookmarks}>
+        <Button variant="outline" className="mt-4" onClick={() => loadBookmarks()}>
           Retry
         </Button>
       </div>
@@ -222,6 +239,9 @@ export function BookmarkTree() {
               onDragEnd={handleDragEnd}
               isDragOver={dragOverId === bookmark.id}
               dragOverId={dragOverId}
+              editingId={editingId}
+              onSetEditingId={setEditingId}
+              onHover={setHoveredId}
             />
           ))
         )}
