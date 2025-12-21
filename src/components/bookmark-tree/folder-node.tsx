@@ -1,5 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useInlineEdit } from '@/hooks/use-inline-edit'
 import { getDepthPadding } from '@/lib/bookmark-utils'
 import { isRootFolder } from '@/lib/chrome-bookmarks'
@@ -173,44 +178,58 @@ export default function FolderNode({ folder, depth }: FolderNodeProps) {
 
         {!isEditing && (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation()
-                sortFolderContents(folder.id)
-              }}
-              title="Sort by name"
-            >
-              <ArrowDownAZ className="size-4 text-muted-foreground" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation()
-                setAddFolderOpen(true)
-              }}
-            >
-              <FolderPlus className="size-4 text-muted-foreground" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    sortFolderContents(folder.id)
+                  }}
+                >
+                  <ArrowDownAZ className="size-4 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Sort by name</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setAddFolderOpen(true)
+                  }}
+                >
+                  <FolderPlus className="size-4 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add folder</TooltipContent>
+            </Tooltip>
           </>
         )}
 
         {!isEditing && !isRoot && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsDeleteDialogOpen(true)
-            }}
-          >
-            <Trash2 className="size-4 text-destructive" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsDeleteDialogOpen(true)
+                }}
+              >
+                <Trash2 className="size-4 text-destructive" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
         )}
       </div>
 

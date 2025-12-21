@@ -1,5 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useInlineEdit } from '@/hooks/use-inline-edit'
 import { getDepthPadding, getFaviconUrl } from '@/lib/bookmark-utils'
 import { cn } from '@/lib/utils'
@@ -104,43 +109,49 @@ export default function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
             </Button>
           </div>
         ) : (
-          <>
-            <button
-              onClick={() => startEditing(bookmark.id)}
-              className="flex flex-1 items-center gap-2 text-left min-w-0 cursor-pointer"
-            >
-              <span className="truncate max-w-48">{bookmark.title}</span>
+          <button
+            onClick={() => startEditing(bookmark.id)}
+            className="flex flex-1 items-center gap-2 text-left min-w-0 cursor-pointer"
+          >
+            <span className="truncate max-w-48">{bookmark.title}</span>
+            <div className="flex items-center gap-1 min-w-0">
               <span className="truncate max-w-72 text-xs text-muted-foreground">
                 {bookmark.url}
               </span>
-            </button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation()
-                window.open(bookmark.url, '_blank', 'noopener,noreferrer')
-              }}
-              title="Open in new tab"
-            >
-              <ExternalLink className="size-4 text-muted-foreground" />
-            </Button>
-          </>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      window.open(bookmark.url, '_blank', 'noopener,noreferrer')
+                    }}
+                  >
+                    <ExternalLink className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Open in new tab</TooltipContent>
+              </Tooltip>
+            </div>
+          </button>
         )}
 
         {!isEditing && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-            onClick={(e) => {
-              e.stopPropagation()
-              setDeleteDialogOpen(true)
-            }}
-          >
-            <Trash2 className="size-4 text-destructive" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setDeleteDialogOpen(true)
+                }}
+              >
+                <Trash2 className="size-4 text-destructive" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
         )}
       </div>
 
