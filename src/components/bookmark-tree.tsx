@@ -2,7 +2,7 @@ import type React from "react"
 import { useState, useCallback, useEffect } from "react"
 import type { Bookmark } from "@/types/bookmark"
 import { BookmarkItem } from "./bookmark-item"
-import { BookmarkPlus, FolderPlus, Loader2 } from "lucide-react"
+import { BookmarkPlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   fetchBookmarks,
@@ -10,6 +10,7 @@ import {
   updateBookmark,
   deleteBookmark,
   moveBookmark,
+  sortFolderByName,
   isRootFolder,
 } from "@/lib/chrome-bookmarks"
 
@@ -177,16 +178,23 @@ export function BookmarkTree() {
     }
   }
 
-  const handleAddFolder = async () => {
+  const handleAddFolder = useCallback(async (parentId: string, folderName: string) => {
     try {
-      // Add to the first folder (Bookmarks Bar) by default
-      const parentId = bookmarks[0]?.id || '1'
-      await createBookmark(parentId, "New Folder")
+      await createBookmark(parentId, folderName)
       await loadBookmarks(false)
     } catch (err) {
       console.error('Failed to create folder:', err)
     }
-  }
+  }, [])
+
+  const handleSortFolder = useCallback(async (folderId: string) => {
+    try {
+      await sortFolderByName(folderId)
+      await loadBookmarks(false)
+    } catch (err) {
+      console.error('Failed to sort folder:', err)
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -214,10 +222,6 @@ export function BookmarkTree() {
           <BookmarkPlus className="mr-2 h-4 w-4" />
           Add Bookmark
         </Button>
-        <Button variant="outline" size="sm" onClick={handleAddFolder}>
-          <FolderPlus className="mr-2 h-4 w-4" />
-          Add Folder
-        </Button>
       </div>
       <div className="rounded-lg border bg-card" onDragOver={(e) => e.preventDefault()}>
         {bookmarks.length === 0 ? (
@@ -233,6 +237,8 @@ export function BookmarkTree() {
               depth={0}
               onUpdate={handleUpdate}
               onDelete={handleDelete}
+              onAddFolder={handleAddFolder}
+              onSortFolder={handleSortFolder}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}

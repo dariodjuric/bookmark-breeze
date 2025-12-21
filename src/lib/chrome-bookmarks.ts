@@ -59,6 +59,25 @@ export async function moveBookmark(
   return chrome.bookmarks.move(id, destination)
 }
 
+// Sort bookmarks in a folder alphabetically by title
+export async function sortFolderByName(folderId: string): Promise<void> {
+  const results = await chrome.bookmarks.getChildren(folderId)
+
+  // Sort: folders first, then bookmarks, both alphabetically by title
+  const sorted = [...results].sort((a, b) => {
+    const aIsFolder = !a.url
+    const bIsFolder = !b.url
+    if (aIsFolder && !bIsFolder) return -1
+    if (!aIsFolder && bIsFolder) return 1
+    return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+  })
+
+  // Move each bookmark to its new position
+  for (let i = 0; i < sorted.length; i++) {
+    await chrome.bookmarks.move(sorted[i].id, { parentId: folderId, index: i })
+  }
+}
+
 // Check if a bookmark ID is a special Chrome root folder (cannot be edited/deleted)
 export function isRootFolder(id: string): boolean {
   // "0" is the root, "1" is Bookmarks Bar, "2" is Other Bookmarks

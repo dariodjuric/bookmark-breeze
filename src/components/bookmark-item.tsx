@@ -2,15 +2,24 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import type { Bookmark } from "@/types/bookmark";
 import {
+  ArrowDownAZ,
   ChevronRight,
   Folder,
   FolderOpen,
+  FolderPlus,
   Link,
   Trash2,
   GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { isRootFolder } from "@/lib/chrome-bookmarks";
 
@@ -19,6 +28,8 @@ interface BookmarkItemProps {
   depth: number;
   onUpdate: (id: string, updates: Partial<Bookmark>) => void;
   onDelete: (id: string) => void;
+  onAddFolder: (parentId: string, folderName: string) => void;
+  onSortFolder: (folderId: string) => void;
   onDragStart: (e: React.DragEvent, bookmark: Bookmark) => void;
   onDragOver: (e: React.DragEvent, bookmark: Bookmark) => void;
   onDrop: (e: React.DragEvent, targetBookmark: Bookmark) => void;
@@ -35,6 +46,8 @@ export function BookmarkItem({
   depth,
   onUpdate,
   onDelete,
+  onAddFolder,
+  onSortFolder,
   onDragStart,
   onDragOver,
   onDrop,
@@ -47,7 +60,10 @@ export function BookmarkItem({
   const [isExpanded, setIsExpanded] = useState(true);
   const [editTitle, setEditTitle] = useState(bookmark.title);
   const [editUrl, setEditUrl] = useState(bookmark.url || "");
+  const [isAddFolderOpen, setIsAddFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const folderNameInputRef = useRef<HTMLInputElement>(null);
 
   // Check if this is a root folder that can't be edited/deleted
   const isRoot = isRootFolder(bookmark.id);
@@ -94,6 +110,21 @@ export function BookmarkItem({
     } else if (e.key === "Escape") {
       e.stopPropagation();
       handleCancel();
+    }
+  };
+
+  const handleAddFolderSubmit = () => {
+    if (newFolderName.trim()) {
+      onAddFolder(bookmark.id, newFolderName.trim());
+      setNewFolderName("");
+      setIsAddFolderOpen(false);
+    }
+  };
+
+  const handleAddFolderKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddFolderSubmit();
     }
   };
 
@@ -196,17 +227,44 @@ export function BookmarkItem({
           </button>
         )}
 
+        {!isEditing && bookmark.isFolder && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSortFolder(bookmark.id);
+              }}
+              title="Sort by name"
+            >
+              <ArrowDownAZ className="size-4 text-muted-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAddFolderOpen(true);
+              }}
+            >
+              <FolderPlus className="size-4 text-muted-foreground" />
+            </Button>
+          </>
+        )}
         {!isEditing && !isRoot && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+            className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(bookmark.id);
             }}
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="size-4 text-destructive" />
           </Button>
         )}
       </div>
@@ -220,6 +278,8 @@ export function BookmarkItem({
               depth={depth + 1}
               onUpdate={onUpdate}
               onDelete={onDelete}
+              onAddFolder={onAddFolder}
+              onSortFolder={onSortFolder}
               onDragStart={onDragStart}
               onDragOver={onDragOver}
               onDrop={onDrop}
@@ -233,6 +293,30 @@ export function BookmarkItem({
           ))}
         </div>
       )}
+
+      <Dialog open={isAddFolderOpen} onOpenChange={setIsAddFolderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Folder</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              ref={folderNameInputRef}
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={handleAddFolderKeyDown}
+              placeholder="Folder name"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddFolderOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddFolderSubmit}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
