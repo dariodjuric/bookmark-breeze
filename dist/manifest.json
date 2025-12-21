@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmarkaholic",
+  "version": "1.0.0",
+  "description": "A beautiful bookmark manager with drag-and-drop support",
+  "permissions": [
+    "bookmarks"
+  ],
+  "action": {},
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "**/*",
+        "*"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}

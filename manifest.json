@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmarkaholic",
+  "version": "1.0.0",
+  "description": "A beautiful bookmark manager with drag-and-drop support",
+  "permissions": ["bookmarks"],
+  "action": {},
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  }
+}
