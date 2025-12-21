@@ -1,9 +1,9 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BookmarkTree } from "./components/bookmark-tree";
-import "./index.css";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BookmarkTree } from './components/bookmark-tree'
+import './index.css'
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-6xl p-6">
@@ -14,4 +14,4 @@ createRoot(document.getElementById("root")!).render(
       </div>
     </div>
   </StrictMode>
-);
+)

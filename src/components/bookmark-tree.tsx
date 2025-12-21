@@ -1,9 +1,9 @@
-import type React from "react"
-import { useState, useCallback, useEffect } from "react"
-import type { Bookmark } from "@/types/bookmark"
-import { BookmarkItem } from "./bookmark-item"
-import { BookmarkPlus, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import type React from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import type { Bookmark } from '@/types/bookmark'
+import { BookmarkItem } from './bookmark-item'
+import { BookmarkPlus, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   fetchBookmarks,
   createBookmark,
@@ -12,7 +12,7 @@ import {
   moveBookmark,
   sortFolderByName,
   isRootFolder,
-} from "@/lib/chrome-bookmarks"
+} from '@/lib/chrome-bookmarks'
 
 export function BookmarkTree() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
@@ -33,7 +33,12 @@ export function BookmarkTree() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setEditingId(null)
-      } else if (e.key === 'Enter' && !editingId && hoveredId && !isRootFolder(hoveredId)) {
+      } else if (
+        e.key === 'Enter' &&
+        !editingId &&
+        hoveredId &&
+        !isRootFolder(hoveredId)
+      ) {
         e.preventDefault()
         setEditingId(hoveredId)
       }
@@ -55,16 +60,19 @@ export function BookmarkTree() {
     }
   }
 
-  const findBookmarkById = useCallback((id: string, items: Bookmark[]): Bookmark | null => {
-    for (const item of items) {
-      if (item.id === id) return item
-      if (item.children) {
-        const found = findBookmarkById(id, item.children)
-        if (found) return found
+  const findBookmarkById = useCallback(
+    (id: string, items: Bookmark[]): Bookmark | null => {
+      for (const item of items) {
+        if (item.id === id) return item
+        if (item.children) {
+          const found = findBookmarkById(id, item.children)
+          if (found) return found
+        }
       }
-    }
-    return null
-  }, [])
+      return null
+    },
+    []
+  )
 
   const handleUpdate = useCallback(
     async (id: string, updates: Partial<Bookmark>) => {
@@ -82,7 +90,7 @@ export function BookmarkTree() {
         console.error('Failed to update bookmark:', err)
       }
     },
-    [],
+    []
   )
 
   const handleDelete = useCallback(
@@ -100,18 +108,21 @@ export function BookmarkTree() {
         console.error('Failed to delete bookmark:', err)
       }
     },
-    [bookmarks, findBookmarkById],
+    [bookmarks, findBookmarkById]
   )
 
-  const handleDragStart = useCallback((e: React.DragEvent, bookmark: Bookmark) => {
-    // Don't allow dragging root folders
-    if (isRootFolder(bookmark.id)) {
-      e.preventDefault()
-      return
-    }
-    setDraggedBookmark(bookmark)
-    e.dataTransfer.effectAllowed = "move"
-  }, [])
+  const handleDragStart = useCallback(
+    (e: React.DragEvent, bookmark: Bookmark) => {
+      // Don't allow dragging root folders
+      if (isRootFolder(bookmark.id)) {
+        e.preventDefault()
+        return
+      }
+      setDraggedBookmark(bookmark)
+      e.dataTransfer.effectAllowed = 'move'
+    },
+    []
+  )
 
   const handleDragOver = useCallback(
     (e: React.DragEvent, bookmark: Bookmark) => {
@@ -120,7 +131,7 @@ export function BookmarkTree() {
         setDragOverId(bookmark.id)
       }
     },
-    [draggedBookmark],
+    [draggedBookmark]
   )
 
   const handleDrop = useCallback(
@@ -146,20 +157,25 @@ export function BookmarkTree() {
         return false
       }
 
-      if (draggedBookmark.isFolder && isDescendant(draggedBookmark, targetBookmark.id)) {
+      if (
+        draggedBookmark.isFolder &&
+        isDescendant(draggedBookmark, targetBookmark.id)
+      ) {
         return
       }
 
       if (targetBookmark.isFolder) {
         try {
-          await moveBookmark(draggedBookmark.id, { parentId: targetBookmark.id })
+          await moveBookmark(draggedBookmark.id, {
+            parentId: targetBookmark.id,
+          })
           await loadBookmarks(false)
         } catch (err) {
           console.error('Failed to move bookmark:', err)
         }
       }
     },
-    [draggedBookmark],
+    [draggedBookmark]
   )
 
   const handleDragEnd = useCallback(() => {
@@ -171,21 +187,24 @@ export function BookmarkTree() {
     try {
       // Add to the first folder (Bookmarks Bar) by default
       const parentId = bookmarks[0]?.id || '1'
-      await createBookmark(parentId, "New Bookmark", "https://example.com")
+      await createBookmark(parentId, 'New Bookmark', 'https://example.com')
       await loadBookmarks(false)
     } catch (err) {
       console.error('Failed to create bookmark:', err)
     }
   }
 
-  const handleAddFolder = useCallback(async (parentId: string, folderName: string) => {
-    try {
-      await createBookmark(parentId, folderName)
-      await loadBookmarks(false)
-    } catch (err) {
-      console.error('Failed to create folder:', err)
-    }
-  }, [])
+  const handleAddFolder = useCallback(
+    async (parentId: string, folderName: string) => {
+      try {
+        await createBookmark(parentId, folderName)
+        await loadBookmarks(false)
+      } catch (err) {
+        console.error('Failed to create folder:', err)
+      }
+    },
+    []
+  )
 
   const handleSortFolder = useCallback(async (folderId: string) => {
     try {
@@ -208,7 +227,11 @@ export function BookmarkTree() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-destructive">
         <p>Error: {error}</p>
-        <Button variant="outline" className="mt-4" onClick={() => loadBookmarks()}>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => loadBookmarks()}
+        >
           Retry
         </Button>
       </div>
@@ -223,7 +246,10 @@ export function BookmarkTree() {
           Add Bookmark
         </Button>
       </div>
-      <div className="rounded-lg border bg-card" onDragOver={(e) => e.preventDefault()}>
+      <div
+        className="rounded-lg border bg-card"
+        onDragOver={(e) => e.preventDefault()}
+      >
         {bookmarks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <p>No bookmarks yet</p>

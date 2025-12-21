@@ -26,6 +26,7 @@ This is a Next.js 16 bookmark manager app using the App Router, React 19, Tailwi
 ### State Management
 
 All bookmark state is managed in `BookmarkTree` via useState with recursive helper functions:
+
 - `findBookmarkById`, `removeBookmarkById`, `updateBookmarkById`, `addBookmarkToFolder`
 
 These recursively traverse the tree structure for all operations.

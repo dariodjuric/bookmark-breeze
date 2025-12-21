@@ -1,7 +1,9 @@
 import type { Bookmark } from '../types/bookmark'
 
 // Convert Chrome's BookmarkTreeNode to our Bookmark type
-export function mapChromeBookmark(node: chrome.bookmarks.BookmarkTreeNode): Bookmark {
+export function mapChromeBookmark(
+  node: chrome.bookmarks.BookmarkTreeNode
+): Bookmark {
   return {
     id: node.id,
     title: node.title,
@@ -43,7 +45,10 @@ export async function updateBookmark(
 }
 
 // Delete a bookmark (use removeTree for folders with children)
-export async function deleteBookmark(id: string, isFolder: boolean): Promise<void> {
+export async function deleteBookmark(
+  id: string,
+  isFolder: boolean
+): Promise<void> {
   if (isFolder) {
     await chrome.bookmarks.removeTree(id)
   } else {
