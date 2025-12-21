@@ -7,7 +7,6 @@ import {
   Folder,
   FolderOpen,
   FolderPlus,
-  Link,
   Trash2,
   GripVertical,
 } from "lucide-react";
@@ -184,7 +183,11 @@ export function BookmarkItem({
           </button>
         ) : (
           <div className="flex items-center gap-1 pl-5">
-            <Link className="h-4 w-4 text-muted-foreground" />
+            <img
+              src={`https://www.google.com/s2/favicons?domain=${bookmark.url ? new URL(bookmark.url).hostname : ''}&sz=16`}
+              alt=""
+              className="h-4 w-4"
+            />
           </div>
         )}
 
