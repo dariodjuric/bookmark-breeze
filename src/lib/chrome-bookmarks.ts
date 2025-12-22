@@ -79,8 +79,12 @@ export async function sortFolderByName(folderId: string): Promise<void> {
   const sorted = [...results].sort((a, b) => {
     const aIsFolder = !a.url;
     const bIsFolder = !b.url;
-    if (aIsFolder && !bIsFolder) return -1;
-    if (!aIsFolder && bIsFolder) return 1;
+    if (aIsFolder && !bIsFolder) {
+      return -1;
+    }
+    if (!aIsFolder && bIsFolder) {
+      return 1;
+    }
     return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
   });
 

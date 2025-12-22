@@ -66,7 +66,7 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
     handleCancel,
     handleKeyDown,
   } = useInlineEdit({
-    bookmark: folder,
+    bookmarkOrFolder: folder,
     isRoot,
   });
 

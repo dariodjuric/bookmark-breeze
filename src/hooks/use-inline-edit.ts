@@ -4,20 +4,23 @@ import { isBookmark } from '@/types/bookmark';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseInlineEditOptions {
-  bookmark: BookmarkOrFolder;
+  bookmarkOrFolder: BookmarkOrFolder;
   isRoot: boolean;
 }
 
-export function useInlineEdit({ bookmark, isRoot }: UseInlineEditOptions) {
+export function useInlineEdit({
+  bookmarkOrFolder,
+  isRoot,
+}: UseInlineEditOptions) {
   const isEditing = useBookmarkStore(
-    (state) => state.editingId === bookmark.id
+    (state) => state.editingId === bookmarkOrFolder.id
   );
-  const saveBookmarkEdit = useBookmarkStore((state) => state.saveBookmarkEdit);
+  const saveEdit = useBookmarkStore((state) => state.saveEdit);
   const cancelEditing = useBookmarkStore((state) => state.cancelEditing);
 
-  const [editTitle, setEditTitle] = useState(bookmark.title);
+  const [editTitle, setEditTitle] = useState(bookmarkOrFolder.title);
   const [editUrl, setEditUrl] = useState(
-    isBookmark(bookmark) ? bookmark.url : ''
+    isBookmark(bookmarkOrFolder) ? bookmarkOrFolder.url : ''
   );
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,18 +41,20 @@ export function useInlineEdit({ bookmark, isRoot }: UseInlineEditOptions) {
   // Reset values when entering edit mode
   useEffect(() => {
     if (isEditing) {
-      setEditTitle(bookmark.title);
-      setEditUrl(isBookmark(bookmark) ? bookmark.url : '');
+      setEditTitle(bookmarkOrFolder.title);
+      setEditUrl(isBookmark(bookmarkOrFolder) ? bookmarkOrFolder.url : '');
     }
-  }, [isEditing, bookmark]);
+  }, [isEditing, bookmarkOrFolder]);
 
   const handleSave = useCallback(() => {
-    if (isRoot) return;
-    saveBookmarkEdit(bookmark.id, {
+    if (isRoot) {
+      return;
+    }
+    saveEdit(bookmarkOrFolder.id, {
       title: editTitle,
-      url: isBookmark(bookmark) ? editUrl : undefined,
+      url: isBookmark(bookmarkOrFolder) ? editUrl : undefined,
     });
-  }, [bookmark, editTitle, editUrl, isRoot, saveBookmarkEdit]);
+  }, [bookmarkOrFolder, editTitle, editUrl, isRoot, saveEdit]);
 
   const handleCancel = useCallback(() => {
     cancelEditing();

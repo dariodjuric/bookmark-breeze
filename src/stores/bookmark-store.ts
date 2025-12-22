@@ -34,7 +34,7 @@ interface BookmarkActions {
   // Bookmark CRUD
   addBookmark: (parentId?: string) => Promise<void>;
   addFolder: (parentId: string, folderName: string) => Promise<void>;
-  saveBookmarkEdit: (
+  saveEdit: (
     id: string,
     updates: { title?: string; url?: string }
   ) => Promise<void>;
@@ -66,10 +66,14 @@ const findBookmarkOrFolderById = (
   bookmarksOrFolders: BookmarkOrFolder[]
 ): BookmarkOrFolder | null => {
   for (const bookmarkOrFolder of bookmarksOrFolders) {
-    if (bookmarkOrFolder.id === id) return bookmarkOrFolder;
+    if (bookmarkOrFolder.id === id) {
+      return bookmarkOrFolder;
+    }
     if (isFolder(bookmarkOrFolder)) {
       const found = findBookmarkOrFolderById(id, bookmarkOrFolder.children);
-      if (found) return found;
+      if (found) {
+        return found;
+      }
     }
   }
   return null;
@@ -77,9 +81,13 @@ const findBookmarkOrFolderById = (
 
 // Helper to check if a bookmark is a descendant of another
 const isDescendant = (parent: Folder, childId: string): boolean => {
-  if (parent.id === childId) return true;
+  if (parent.id === childId) {
+    return true;
+  }
   return parent.children.some((child) => {
-    if (child.id === childId) return true;
+    if (child.id === childId) {
+      return true;
+    }
     if (isFolder(child)) {
       return isDescendant(child, childId);
     }
@@ -145,8 +153,10 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     }
   },
 
-  saveBookmarkEdit: async (id, updates) => {
-    if (isRootFolder(id)) return;
+  saveEdit: async (id, updates) => {
+    if (isRootFolder(id)) {
+      return;
+    }
 
     try {
       await updateBookmark(id, {
@@ -161,7 +171,9 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   },
 
   removeBookmark: async (id) => {
-    if (isRootFolder(id)) return;
+    if (isRootFolder(id)) {
+      return;
+    }
 
     try {
       const { bookmarksOrFolders } = get();
@@ -186,7 +198,9 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
 
   // Editing actions
   startEditing: (bookmarkId) => {
-    if (isRootFolder(bookmarkId)) return;
+    if (isRootFolder(bookmarkId)) {
+      return;
+    }
     set({ editingId: bookmarkId });
   },
 
@@ -203,7 +217,9 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
 
   // Drag & drop actions
   startDragging: (bookmarkOrFolder) => {
-    if (isRootFolder(bookmarkOrFolder.id)) return;
+    if (isRootFolder(bookmarkOrFolder.id)) {
+      return;
+    }
     set({ draggedBookmarkOrFolder: bookmarkOrFolder });
   },
 
