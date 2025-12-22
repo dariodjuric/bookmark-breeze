@@ -49,12 +49,10 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
   const hoverDropTarget = useBookmarkStore((state) => state.hoverDropTarget);
   const clearDropTarget = useBookmarkStore((state) => state.clearDropTarget);
   const dropIntoFolder = useBookmarkStore((state) => state.dropIntoFolder);
-  const endDrag = useBookmarkStore((state) => state.endDrag);
-  const setHoveredBookmark = useBookmarkStore(
-    (state) => state.setHoveredBookmark
-  );
-  const clearHoveredBookmark = useBookmarkStore(
-    (state) => state.clearHoveredBookmark
+  const stopDragging = useBookmarkStore((state) => state.stopDragging);
+  const hoverFolder = useBookmarkStore((state) => state.hoverBookmarkOrFolder);
+  const unhoverFolder = useBookmarkStore(
+    (state) => state.unhoverBookmarkOrFolder
   );
 
   const isRoot = isRootFolder(folder.id);
@@ -109,9 +107,9 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onDragLeave={handleDragLeave}
-        onDragEnd={endDrag}
-        onMouseEnter={() => setHoveredBookmark(folder.id)}
-        onMouseLeave={clearHoveredBookmark}
+        onDragEnd={stopDragging}
+        onMouseEnter={() => hoverFolder(folder.id)}
+        onMouseLeave={unhoverFolder}
       >
         {!isRoot && (
           <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />

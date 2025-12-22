@@ -25,12 +25,12 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
   const startEditing = useBookmarkStore((state) => state.startEditing);
   const removeBookmark = useBookmarkStore((state) => state.removeBookmark);
   const startDragging = useBookmarkStore((state) => state.startDragging);
-  const endDrag = useBookmarkStore((state) => state.endDrag);
-  const setHoveredBookmark = useBookmarkStore(
-    (state) => state.setHoveredBookmark
+  const stopDragging = useBookmarkStore((state) => state.stopDragging);
+  const hoverBookmark = useBookmarkStore(
+    (state) => state.hoverBookmarkOrFolder
   );
-  const clearHoveredBookmark = useBookmarkStore(
-    (state) => state.clearHoveredBookmark
+  const unhoverBookmark = useBookmarkStore(
+    (state) => state.unhoverBookmarkOrFolder
   );
 
   const {
@@ -67,9 +67,9 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
         style={{ paddingLeft: getDepthPadding(depth) }}
         draggable={!isEditing}
         onDragStart={handleDragStart}
-        onDragEnd={endDrag}
-        onMouseEnter={() => setHoveredBookmark(bookmark.id)}
-        onMouseLeave={clearHoveredBookmark}
+        onDragEnd={stopDragging}
+        onMouseEnter={() => hoverBookmark(bookmark.id)}
+        onMouseLeave={unhoverBookmark}
       >
         <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
 

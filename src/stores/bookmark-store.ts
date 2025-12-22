@@ -51,11 +51,11 @@ interface BookmarkActions {
   hoverDropTarget: (folderId: string) => void;
   clearDropTarget: () => void;
   dropIntoFolder: (targetFolderId: string) => Promise<void>;
-  endDrag: () => void;
+  stopDragging: () => void;
 
   // Hover (for keyboard shortcuts)
-  setHoveredBookmark: (bookmarkId: string) => void;
-  clearHoveredBookmark: () => void;
+  hoverBookmarkOrFolder: (bookmarkOrFolderId: string) => void;
+  unhoverBookmarkOrFolder: () => void;
 }
 
 type BookmarkStore = BookmarkState & BookmarkActions;
@@ -255,16 +255,16 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
   },
 
-  endDrag: () => {
+  stopDragging: () => {
     set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
   },
 
   // Hover actions
-  setHoveredBookmark: (bookmarkId) => {
+  hoverBookmarkOrFolder: (bookmarkId) => {
     set({ hoveredId: bookmarkId });
   },
 
-  clearHoveredBookmark: () => {
+  unhoverBookmarkOrFolder: () => {
     set({ hoveredId: null });
   },
 }));
