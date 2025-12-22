@@ -15,13 +15,3 @@ export function countDescendants(folder: Folder): number {
 export function getDepthPadding(depth: number): string {
   return `${depth * 20 + 8}px`;
 }
-
-// Generate favicon URL for a bookmark
-export function getFaviconUrl(url: string): string {
-  try {
-    const hostname = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
-  } catch {
-    return '';
-  }
-}

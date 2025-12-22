@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useInlineEdit } from '@/hooks/use-inline-edit';
-import { getDepthPadding, getFaviconUrl } from '@/lib/bookmark-utils';
+import { getDepthPadding } from '@/lib/bookmark-utils';
 import { cn } from '@/lib/utils';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { Bookmark } from '@/types/bookmark';
@@ -85,19 +85,19 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Title"
-              className="h-7 flex-1"
+              className="h-7 flex-1 text-xs!"
             />
             <Input
               value={editUrl}
               onChange={(e) => setEditUrl(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="URL"
-              className="h-7 flex-1"
+              className="h-7 flex-1 text-xs!"
             />
             <Button
               type="button"
               size="sm"
-              className="h-7 px-2"
+              className="h-7 px-2 text-xs"
               onClick={handleSave}
             >
               Save
@@ -106,7 +106,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
               type="button"
               size="sm"
               variant="outline"
-              className="h-7 px-2 bg-transparent"
+              className="h-7 px-2 bg-transparent text-xs"
               onClick={handleCancel}
             >
               Cancel
@@ -163,6 +163,15 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
       />
     </div>
   );
+}
+
+export function getFaviconUrl(url: string): string {
+  try {
+    const hostname = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+  } catch {
+    return '';
+  }
 }
 
 export default memo(BookmarkNode);
