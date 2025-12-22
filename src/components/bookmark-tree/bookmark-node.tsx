@@ -44,7 +44,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
     handleCancel,
     handleKeyDown,
   } = useInlineEdit({
-    bookmarkOrFolder,
+    bookmarkOrFolder: bookmark,
     isRoot: false,
   });
 
