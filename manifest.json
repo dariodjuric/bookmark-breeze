@@ -3,7 +3,7 @@
   "name": "Bookmarkaholic",
   "version": "1.0.0",
   "description": "Curate your links at lightning speed.",
-  "permissions": ["bookmarks"],
+  "permissions": ["bookmarks", "storage"],
   "action": {
     "default_icon": "icon.svg"
   },

@@ -32,9 +32,9 @@ interface FolderNodeProps {
 }
 
 function FolderNode({ folder, depth }: FolderNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setExpanded] = useState(true);
   const [isAddFolderOpen, setAddFolderOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const isDragOverThis = useBookmarkStore(
     (state) => state.dragOverFolderId === folder.id
@@ -53,6 +53,9 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
   const hoverFolder = useBookmarkStore((state) => state.hoverBookmarkOrFolder);
   const unhoverFolder = useBookmarkStore(
     (state) => state.unhoverBookmarkOrFolder
+  );
+  const confirmDeletions = useBookmarkStore(
+    (state) => state.settings.confirmDeletions
   );
 
   const isRoot = isRootFolder(folder.id);
@@ -117,7 +120,7 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
         {isRoot && <div className="w-4" />}
 
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => setExpanded(!isExpanded)}
           className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground"
         >
           <ChevronRight
@@ -221,7 +224,11 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
                 className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsDeleteDialogOpen(true);
+                  if (confirmDeletions) {
+                    setDeleteDialogOpen(true);
+                  } else {
+                    removeBookmark(folder.id);
+                  }
                 }}
               >
                 <Trash2 className="size-4 text-destructive" />
@@ -253,7 +260,7 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
       <DeleteDialog
         folder={folder}
         open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
         onConfirm={() => removeBookmark(folder.id)}
       />
     </div>

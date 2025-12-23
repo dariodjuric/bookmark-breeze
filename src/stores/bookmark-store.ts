@@ -7,6 +7,11 @@ import {
   sortFolderByName,
   updateBookmark,
 } from '@/lib/chrome-bookmarks';
+import {
+  loadSettings,
+  saveSettings,
+  type Settings,
+} from '@/lib/settings-storage';
 import type { BookmarkOrFolder, Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
 import { create } from 'zustand';
@@ -24,6 +29,9 @@ interface BookmarkState {
   draggedBookmarkOrFolder: BookmarkOrFolder | null;
   dragOverFolderId: string | null;
   hoveredId: string | null;
+
+  // Settings
+  settings: Settings;
 }
 
 interface BookmarkActions {
@@ -55,6 +63,9 @@ interface BookmarkActions {
   // Hover (for keyboard shortcuts)
   hoverBookmarkOrFolder: (bookmarkOrFolderId: string) => void;
   unhoverBookmarkOrFolder: () => void;
+
+  // Settings
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
 }
 
 type BookmarkStore = BookmarkState & BookmarkActions;
@@ -103,13 +114,17 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   draggedBookmarkOrFolder: null,
   dragOverFolderId: null,
   hoveredId: null,
+  settings: { confirmDeletions: true },
 
   // Data loading actions
   openPage: async () => {
     try {
       set({ status: 'loading', error: null });
       const data = await fetchBookmarks();
-      set({ bookmarksOrFolders: data, status: 'idle' });
+      const settings = await loadSettings().catch(() => ({
+        confirmDeletions: true,
+      }));
+      set({ bookmarksOrFolders: data, settings, status: 'idle' });
     } catch (err) {
       set({
         status: 'error',
@@ -266,5 +281,18 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
 
   unhoverBookmarkOrFolder: () => {
     set({ hoveredId: null });
+  },
+
+  // Settings actions
+  updateSettings: async (updates) => {
+    const oldSettings = get().settings;
+    const newSettings = { ...oldSettings, ...updates };
+    set({ settings: newSettings });
+    try {
+      await saveSettings(newSettings);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+      set({ settings: oldSettings });
+    }
   },
 }));

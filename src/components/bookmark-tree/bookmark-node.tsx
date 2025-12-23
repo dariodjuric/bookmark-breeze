@@ -32,6 +32,9 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
   const unhoverBookmark = useBookmarkStore(
     (state) => state.unhoverBookmarkOrFolder
   );
+  const confirmDeletions = useBookmarkStore(
+    (state) => state.settings.confirmDeletions
+  );
 
   const {
     isEditing,
@@ -144,7 +147,11 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
                 className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setDeleteDialogOpen(true);
+                  if (confirmDeletions) {
+                    setDeleteDialogOpen(true);
+                  } else {
+                    removeBookmark(bookmark.id);
+                  }
                 }}
               >
                 <Trash2 className="size-4 text-destructive" />
