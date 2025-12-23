@@ -8,12 +8,14 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-5xl p-6 flex flex-col gap-6">
+        <div className="container mx-auto max-w-6xl p-6 flex flex-col gap-6">
           <div className="flex flex-col items-center justify-center gap-1">
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-4xl font-bold text-foreground">
               Bookmarkaholic
             </h1>
-            <p className="text-sm">Curate your links at lightning speed.</p>
+            <p className="text-sm text-muted-foreground">
+              Curate your links at lightning speed
+            </p>
           </div>
           <MainPage />
         </div>

@@ -1,9 +1,11 @@
 export interface Settings {
   confirmDeletions: boolean;
+  expandAllByDefault: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
   confirmDeletions: true,
+  expandAllByDefault: true,
 };
 
 const STORAGE_KEY = 'settings';

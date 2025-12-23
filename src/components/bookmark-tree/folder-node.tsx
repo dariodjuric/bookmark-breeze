@@ -32,7 +32,10 @@ interface FolderNodeProps {
 }
 
 function FolderNode({ folder, depth }: FolderNodeProps) {
-  const [isExpanded, setExpanded] = useState(true);
+  const expandAllByDefault = useBookmarkStore(
+    (state) => state.settings.expandAllByDefault
+  );
+  const [isExpanded, setExpanded] = useState(expandAllByDefault);
   const [isAddFolderOpen, setAddFolderOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 

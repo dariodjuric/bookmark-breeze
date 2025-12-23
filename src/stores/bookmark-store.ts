@@ -114,7 +114,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   draggedBookmarkOrFolder: null,
   dragOverFolderId: null,
   hoveredId: null,
-  settings: { confirmDeletions: true },
+  settings: { confirmDeletions: true, expandAllByDefault: true },
 
   // Data loading actions
   openPage: async () => {
@@ -123,6 +123,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
       const data = await fetchBookmarks();
       const settings = await loadSettings().catch(() => ({
         confirmDeletions: true,
+        expandAllByDefault: true,
       }));
       set({ bookmarksOrFolders: data, settings, status: 'idle' });
     } catch (err) {

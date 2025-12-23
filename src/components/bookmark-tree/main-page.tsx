@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card } from '@/components/ui/card';
 import { useBookmarkKeyboardShortcuts } from '@/hooks/use-bookmark-keyboard-shortcuts';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import BookmarkTree from './bookmark-tree';
+import SettingsCard from './settings-card';
 
 export default function MainPage() {
   const bookmarksOrFolders = useBookmarkStore(
@@ -13,10 +14,6 @@ export default function MainPage() {
   const status = useBookmarkStore((state) => state.status);
   const error = useBookmarkStore((state) => state.error);
   const openPage = useBookmarkStore((state) => state.openPage);
-  const confirmDeletions = useBookmarkStore(
-    (state) => state.settings.confirmDeletions
-  );
-  const updateSettings = useBookmarkStore((state) => state.updateSettings);
 
   useEffect(() => {
     openPage();
@@ -44,26 +41,8 @@ export default function MainPage() {
   }
 
   return (
-    <>
-      <div className="mb-2 flex items-center justify-end gap-2">
-        <Checkbox
-          id="confirm-deletions"
-          checked={confirmDeletions}
-          onCheckedChange={(checked) =>
-            updateSettings({ confirmDeletions: checked === true })
-          }
-        />
-        <label
-          htmlFor="confirm-deletions"
-          className="cursor-pointer text-sm text-muted-foreground"
-        >
-          Confirm deletions
-        </label>
-      </div>
-      <div
-        className="rounded-lg border bg-card"
-        onDragOver={(e) => e.preventDefault()}
-      >
+    <div className="flex gap-4">
+      <Card className="flex-1 gap-0 p-2" onDragOver={(e) => e.preventDefault()}>
         {bookmarksOrFolders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <p>No bookmarks yet</p>
@@ -72,7 +51,10 @@ export default function MainPage() {
         ) : (
           <BookmarkTree bookmarksOrFolders={bookmarksOrFolders} />
         )}
+      </Card>
+      <div className="w-72 shrink-0">
+        <SettingsCard />
       </div>
-    </>
+    </div>
   );
 }
