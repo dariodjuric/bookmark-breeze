@@ -10,9 +10,10 @@ import { getDepthPadding } from '@/lib/depth-calculation';
 import { cn } from '@/lib/tailwind';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { Bookmark } from '@/types/bookmark';
-import { ExternalLink, GripVertical, Trash2 } from 'lucide-react';
+import { ExternalLink, FolderInput, GripVertical, Trash2 } from 'lucide-react';
 import { memo, useState } from 'react';
 import DeleteDialog from './dialogs/delete-dialog';
+import MoveToFolderDropdown from './move-to-folder-dropdown';
 
 interface BookmarkNodeProps {
   bookmark: Bookmark;
@@ -144,26 +145,43 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
         )}
 
         {!isEditing && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirmDeletions) {
-                    setDeleteDialogOpen(true);
-                  } else {
-                    removeBookmark(bookmark.id);
-                  }
-                }}
-              >
-                <Trash2 className="size-4 text-destructive" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
-          </Tooltip>
+          <>
+            <MoveToFolderDropdown item={bookmark}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <FolderInput className="size-4 text-muted-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Move to folder</TooltipContent>
+              </Tooltip>
+            </MoveToFolderDropdown>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirmDeletions) {
+                      setDeleteDialogOpen(true);
+                    } else {
+                      removeBookmark(bookmark.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="size-4 text-destructive" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete</TooltipContent>
+            </Tooltip>
+          </>
         )}
       </div>
 

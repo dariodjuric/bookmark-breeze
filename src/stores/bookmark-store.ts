@@ -64,6 +64,9 @@ interface BookmarkActions {
   hoverBookmarkOrFolder: (bookmarkOrFolderId: string) => void;
   unhoverBookmarkOrFolder: () => void;
 
+  // Move to folder
+  moveToFolder: (itemId: string, targetFolderId: string) => Promise<void>;
+
   // Settings
   updateSettings: (updates: Partial<Settings>) => Promise<void>;
 }
@@ -282,6 +285,32 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
 
   unhoverBookmarkOrFolder: () => {
     set({ hoveredId: null });
+  },
+
+  // Move to folder action
+  moveToFolder: async (itemId, targetFolderId) => {
+    if (isRootFolder(itemId)) {
+      return;
+    }
+
+    const { bookmarksOrFolders } = get();
+    const item = findBookmarkOrFolderById(itemId, bookmarksOrFolders);
+
+    if (!item) {
+      return;
+    }
+
+    // Prevent moving folder into itself or its descendants
+    if (isFolder(item) && isDescendant(item, targetFolderId)) {
+      return;
+    }
+
+    try {
+      await moveBookmark(itemId, { parentId: targetFolderId });
+      await get().refreshBookmarks();
+    } catch (err) {
+      console.error('Failed to move bookmark:', err);
+    }
   },
 
   // Settings actions
