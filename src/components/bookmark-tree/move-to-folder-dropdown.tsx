@@ -10,9 +10,9 @@ import {
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { BookmarkOrFolder, Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
-import { Folder as FolderIcon, FolderInput } from 'lucide-react';
+import { Folder as FolderIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 
 interface MoveToFolderDropdownProps {
   item: BookmarkOrFolder;
@@ -20,6 +20,7 @@ interface MoveToFolderDropdownProps {
 }
 
 function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
+  const [open, setOpen] = useState(false);
   const bookmarksOrFolders = useBookmarkStore(
     (state) => state.bookmarksOrFolders
   );
@@ -50,10 +51,11 @@ function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
 
   const handleMove = (targetFolderId: string) => {
     moveToFolder(item.id, targetFolderId);
+    setOpen(false);
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger>{children}</DropdownMenuTrigger>
       <DropdownMenuContent className="max-h-80 overflow-y-auto w-52">
         {topLevelFolders.map((folder) => (
@@ -114,19 +116,19 @@ function FolderMenuItem({
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="gap-2 cursor-pointer">
+      <DropdownMenuSubTrigger
+        className="gap-2 cursor-pointer"
+        disabled={disabled}
+        onClick={(e) => {
+          if (disabled) return;
+          e.preventDefault();
+          onMove(folder.id);
+        }}
+      >
         <FolderIcon className="h-4 w-4 text-amber-500" />
         {folder.title || '(untitled)'}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
-        <DropdownMenuItem
-          disabled={disabled}
-          onClick={() => !disabled && onMove(folder.id)}
-          className="gap-2"
-        >
-          <FolderInput className="h-4 w-4" />
-          Move here
-        </DropdownMenuItem>
         {childFolders.map((child) => (
           <FolderMenuItem
             key={child.id}
