@@ -3,6 +3,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { BookmarkOrFolder, Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
@@ -65,7 +70,12 @@ function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>{children}</PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Move to folder</TooltipContent>
+      </Tooltip>
       <PopoverContent className="w-64 p-0" align="start">
         <div className="flex items-center gap-2 border-b px-3 py-2">
           <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -122,15 +132,7 @@ function filterFolders(folders: Folder[], query: string): Folder[] {
     if (titleMatches || filteredChildren.length > 0) {
       result.push({
         ...folder,
-        children: titleMatches
-          ? folder.children
-          : folder.children.map((child) => {
-              if (isFolder(child)) {
-                const filtered = filterFolders([child], query);
-                return filtered.length > 0 ? filtered[0] : child;
-              }
-              return child;
-            }),
+        children: filteredChildren,
       });
     }
   }

@@ -11,6 +11,7 @@ import { useBookmarkStore } from '@/stores/bookmark-store';
 import { Bookmark, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import BookmarkTree from './bookmark-tree';
+import ScanCard from './scan-card';
 import SettingsCard from './settings-card';
 
 export default function MainPage() {
@@ -67,8 +68,9 @@ export default function MainPage() {
           )}
         </CardContent>
       </Card>
-      <div className="w-72 shrink-0">
+      <div className="w-72 shrink-0 space-y-4">
         <SettingsCard />
+        <ScanCard />
       </div>
     </div>
   );

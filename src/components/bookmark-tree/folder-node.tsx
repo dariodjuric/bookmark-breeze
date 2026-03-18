@@ -212,19 +212,14 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
             {!isRoot && (
               <>
                 <MoveToFolderDropdown item={folder}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoveRight className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Move to folder</TooltipContent>
-                  </Tooltip>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoveRight className="h-3 w-3 text-muted-foreground" />
+                  </Button>
                 </MoveToFolderDropdown>
                 <Tooltip>
                   <TooltipTrigger asChild>

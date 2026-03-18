@@ -118,52 +118,45 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
             >
               {bookmark.title}
             </button>
-            <div className="flex items-center gap-1 min-w-0">
-              <button
-                onClick={() => startEditing(bookmark.id)}
-                className="truncate max-w-96 text-xs text-muted-foreground cursor-pointer hover:underline"
-              >
-                {bookmark.url}
-              </button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    asChild
-                  >
-                    <a
-                      href={bookmark.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                    </a>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Open in new tab</TooltipContent>
-              </Tooltip>
-            </div>
+            <button
+              onClick={() => startEditing(bookmark.id)}
+              className="truncate max-w-96 text-xs text-muted-foreground cursor-pointer hover:underline"
+            >
+              {bookmark.url}
+            </button>
           </div>
         )}
 
         {!isEditing && (
           <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-            <MoveToFolderDropdown item={bookmark}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={(e) => e.stopPropagation()}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  asChild
+                >
+                  <a
+                    href={bookmark.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <MoveRight className="h-3 w-3 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Move to folder</TooltipContent>
-              </Tooltip>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open in new tab</TooltipContent>
+            </Tooltip>
+            <MoveToFolderDropdown item={bookmark}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoveRight className="h-3 w-3 text-muted-foreground" />
+              </Button>
             </MoveToFolderDropdown>
             <Tooltip>
               <TooltipTrigger asChild>
