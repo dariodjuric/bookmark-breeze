@@ -26,7 +26,6 @@ type DeleteDialogProps =
     };
 
 export default function DeleteDialog({
-  bookmark: _bookmark,
   folder,
   open,
   onOpenChange,
