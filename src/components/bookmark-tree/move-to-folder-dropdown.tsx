@@ -1,16 +1,12 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { BookmarkOrFolder, Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
-import { Folder as FolderIcon } from 'lucide-react';
+import { Folder as FolderIcon, Search } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { memo, useMemo, useState } from 'react';
 
@@ -21,6 +17,7 @@ interface MoveToFolderDropdownProps {
 
 function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const bookmarksOrFolders = useBookmarkStore(
     (state) => state.bookmarksOrFolders
   );
@@ -33,15 +30,12 @@ function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
 
   const isDisabled = useMemo(() => {
     return (folderId: string) => {
-      // Can't move to current parent
       if (item.parentId === folderId) {
         return true;
       }
-      // Can't move folder into itself
       if (item.id === folderId) {
         return true;
       }
-      // Can't move folder into its descendants
       if (isFolder(item) && isDescendantOf(item, folderId)) {
         return true;
       }
@@ -52,27 +46,60 @@ function MoveToFolderDropdown({ item, children }: MoveToFolderDropdownProps) {
   const handleMove = (targetFolderId: string) => {
     moveToFolder(item.id, targetFolderId);
     setOpen(false);
+    setSearch('');
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setSearch('');
+    }
+  };
+
+  const filteredFolders = useMemo(() => {
+    if (!search.trim()) {
+      return topLevelFolders;
+    }
+    return filterFolders(topLevelFolders, search.toLowerCase());
+  }, [topLevelFolders, search]);
+
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent className="max-h-80 overflow-y-auto w-52">
-        {topLevelFolders.map((folder) => (
-          <FolderMenuItem
-            key={folder.id}
-            folder={folder}
-            itemToMove={item}
-            onMove={handleMove}
-            isDisabled={isDisabled}
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-64 p-0" align="start">
+        <div className="flex items-center gap-2 border-b px-3 py-2">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <input
+            type="text"
+            placeholder="Search folders..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </div>
+        <div className="max-h-60 overflow-y-auto p-1">
+          {filteredFolders.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-muted-foreground">
+              No folders found
+            </div>
+          ) : (
+            filteredFolders.map((folder) => (
+              <FolderTreeItem
+                key={folder.id}
+                folder={folder}
+                depth={0}
+                onMove={handleMove}
+                isDisabled={isDisabled}
+                searchQuery={search.toLowerCase()}
+              />
+            ))
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
-// Check if targetId is a descendant of folder
 function isDescendantOf(folder: Folder, targetId: string): boolean {
   for (const child of folder.children) {
     if (child.id === targetId) {
@@ -85,61 +112,71 @@ function isDescendantOf(folder: Folder, targetId: string): boolean {
   return false;
 }
 
-interface FolderMenuItemProps {
-  folder: Folder;
-  itemToMove: BookmarkOrFolder;
-  onMove: (targetFolderId: string) => void;
-  isDisabled: (folderId: string) => boolean;
+function filterFolders(folders: Folder[], query: string): Folder[] {
+  const result: Folder[] = [];
+  for (const folder of folders) {
+    const titleMatches = (folder.title || '').toLowerCase().includes(query);
+    const childFolders = folder.children.filter(isFolder);
+    const filteredChildren = filterFolders(childFolders, query);
+
+    if (titleMatches || filteredChildren.length > 0) {
+      result.push({
+        ...folder,
+        children: titleMatches
+          ? folder.children
+          : folder.children.map((child) => {
+              if (isFolder(child)) {
+                const filtered = filterFolders([child], query);
+                return filtered.length > 0 ? filtered[0] : child;
+              }
+              return child;
+            }),
+      });
+    }
+  }
+  return result;
 }
 
-function FolderMenuItem({
+interface FolderTreeItemProps {
+  folder: Folder;
+  depth: number;
+  onMove: (targetFolderId: string) => void;
+  isDisabled: (folderId: string) => boolean;
+  searchQuery: string;
+}
+
+function FolderTreeItem({
   folder,
-  itemToMove,
+  depth,
   onMove,
   isDisabled,
-}: FolderMenuItemProps) {
-  const childFolders = folder.children.filter(isFolder);
+  searchQuery,
+}: FolderTreeItemProps) {
   const disabled = isDisabled(folder.id);
-
-  if (childFolders.length === 0) {
-    return (
-      <DropdownMenuItem
-        disabled={disabled}
-        onClick={() => !disabled && onMove(folder.id)}
-        className="gap-2 cursor-pointer"
-      >
-        <FolderIcon className="h-4 w-4 text-amber-500" />
-        {folder.title || '(untitled)'}
-      </DropdownMenuItem>
-    );
-  }
+  const childFolders = folder.children.filter(isFolder);
 
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        className="gap-2 cursor-pointer"
+    <>
+      <button
         disabled={disabled}
-        onClick={(e) => {
-          if (disabled) return;
-          e.preventDefault();
-          onMove(folder.id);
-        }}
+        onClick={() => !disabled && onMove(folder.id)}
+        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
-        <FolderIcon className="h-4 w-4 text-amber-500" />
-        {folder.title || '(untitled)'}
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
-        {childFolders.map((child) => (
-          <FolderMenuItem
-            key={child.id}
-            folder={child}
-            itemToMove={itemToMove}
-            onMove={onMove}
-            isDisabled={isDisabled}
-          />
-        ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+        <FolderIcon className="h-4 w-4 shrink-0 text-amber-500" />
+        <span className="truncate">{folder.title || '(untitled)'}</span>
+      </button>
+      {childFolders.map((child) => (
+        <FolderTreeItem
+          key={child.id}
+          folder={child}
+          depth={depth + 1}
+          onMove={onMove}
+          isDisabled={isDisabled}
+          searchQuery={searchQuery}
+        />
+      ))}
+    </>
   );
 }
 

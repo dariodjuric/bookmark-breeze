@@ -1,8 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { useBookmarkKeyboardShortcuts } from '@/hooks/use-bookmark-keyboard-shortcuts';
 import { useBookmarkStore } from '@/stores/bookmark-store';
-import { Loader2 } from 'lucide-react';
+import { Bookmark, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import BookmarkTree from './bookmark-tree';
 import SettingsCard from './settings-card';
@@ -42,15 +48,24 @@ export default function MainPage() {
 
   return (
     <div className="flex gap-4">
-      <Card className="flex-1 gap-0 p-2" onDragOver={(e) => e.preventDefault()}>
-        {bookmarksOrFolders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <p>No bookmarks yet</p>
-            <p className="text-sm">Add a bookmark or folder to get started</p>
-          </div>
-        ) : (
-          <BookmarkTree bookmarksOrFolders={bookmarksOrFolders} />
-        )}
+      <Card className="flex-1 gap-0 py-0" onDragOver={(e) => e.preventDefault()}>
+        <CardHeader className="flex flex-row items-center gap-2 px-4 py-3">
+          <Bookmark className="h-4 w-4 text-primary" />
+          <CardTitle className="font-display text-base">Bookmarks</CardTitle>
+        </CardHeader>
+        <Separator />
+        <CardContent className="p-2">
+          {bookmarksOrFolders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <p>No bookmarks yet</p>
+              <p className="text-sm">
+                Add a bookmark or folder to get started
+              </p>
+            </div>
+          ) : (
+            <BookmarkTree bookmarksOrFolders={bookmarksOrFolders} />
+          )}
+        </CardContent>
       </Card>
       <div className="w-72 shrink-0">
         <SettingsCard />

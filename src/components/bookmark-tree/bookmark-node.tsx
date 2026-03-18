@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Tooltip,
   TooltipContent,
@@ -10,7 +9,7 @@ import { getDepthPadding } from '@/lib/depth-calculation';
 import { cn } from '@/lib/tailwind';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { Bookmark } from '@/types/bookmark';
-import { ExternalLink, FolderInput, GripVertical, Trash2 } from 'lucide-react';
+import { Check, ExternalLink, Globe, MoveRight, Trash2, X } from 'lucide-react';
 import { memo, useState } from 'react';
 import DeleteDialog from './dialogs/delete-dialog';
 import MoveToFolderDropdown from './move-to-folder-dropdown';
@@ -57,10 +56,6 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const onClickLink = () => {
-    window.open(bookmark.url, '_blank', 'noopener,noreferrer');
-  };
-
   return (
     <div className="select-none">
       <div
@@ -75,45 +70,44 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
         onMouseEnter={() => hoverBookmark(bookmark.id)}
         onMouseLeave={unhoverBookmark}
       >
-        <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-
-        <div className="flex items-center gap-1 pl-5">
-          <img src={getFaviconUrl(bookmark.url)} alt="" className="h-4 w-4" />
+        <div className="ml-[18px] flex items-center">
+          <Globe className="h-4 w-4 text-muted-foreground" />
         </div>
 
         {isEditing ? (
           <div className="flex flex-1 items-center gap-2">
-            <Input
+            <input
               ref={titleInputRef}
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Title"
-              className="h-7 flex-1 text-xs!"
+              className="h-7 flex-1 rounded-md border bg-card px-2 text-xs outline-none focus:border-primary"
             />
-            <Input
+            <input
               value={editUrl}
               onChange={(e) => setEditUrl(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="URL"
-              className="h-7 flex-1 text-xs!"
+              className="h-7 flex-1 rounded-md border bg-card px-2 text-xs outline-none focus:border-primary"
             />
             <Button
               type="button"
-              size="sm"
-              className="h-7 px-2 text-xs"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={handleSave}
             >
-              Save
+              <Check className="h-3 w-3" />
             </Button>
             <Button
               type="button"
-              size="sm"
-              variant="outline"
-              className="h-7 px-2 bg-transparent text-xs"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={handleCancel}
             >
-              Cancel
+              <X className="h-3 w-3" />
             </Button>
           </div>
         ) : (
@@ -133,10 +127,20 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
               </button>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ExternalLink
-                    className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground cursor-pointer"
-                    onClick={onClickLink}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                    asChild
+                  >
+                    <a
+                      href={bookmark.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </a>
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Open in new tab</TooltipContent>
               </Tooltip>
@@ -145,17 +149,17 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
         )}
 
         {!isEditing && (
-          <>
+          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <MoveToFolderDropdown item={bookmark}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="h-6 w-6"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <FolderInput className="size-4 text-muted-foreground" />
+                    <MoveRight className="h-3 w-3 text-muted-foreground" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Move to folder</TooltipContent>
@@ -166,7 +170,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="h-6 w-6"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (confirmDeletions) {
@@ -176,12 +180,12 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
                     }
                   }}
                 >
-                  <Trash2 className="size-4 text-destructive" />
+                  <Trash2 className="h-3 w-3 text-destructive" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Delete</TooltipContent>
             </Tooltip>
-          </>
+          </div>
         )}
       </div>
 
@@ -193,15 +197,6 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
       />
     </div>
   );
-}
-
-export function getFaviconUrl(url: string): string {
-  try {
-    const hostname = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
-  } catch {
-    return '';
-  }
 }
 
 export default memo(BookmarkNode);

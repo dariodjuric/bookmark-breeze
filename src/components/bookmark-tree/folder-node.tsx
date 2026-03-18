@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Tooltip,
   TooltipContent,
@@ -13,14 +12,15 @@ import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
 import {
-  ArrowDownAZ,
+  ArrowUpDown,
+  Check,
+  ChevronDown,
   ChevronRight,
   Folder as FolderIcon,
-  FolderInput,
-  FolderOpen,
   FolderPlus,
-  GripVertical,
+  MoveRight,
   Trash2,
+  X,
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import BookmarkNode from './bookmark-node';
@@ -119,58 +119,50 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
         onMouseEnter={() => hoverFolder(folder.id)}
         onMouseLeave={unhoverFolder}
       >
-        {!isRoot && (
-          <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-        )}
         {isRoot && <div className="w-4" />}
 
         <button
           onClick={() => setExpanded(!isExpanded)}
           className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground"
         >
-          <ChevronRight
-            className={cn(
-              'h-4 w-4 transition-transform',
-              isExpanded && 'rotate-90'
-            )}
-          />
           {isExpanded ? (
-            <FolderOpen className="h-4 w-4 text-amber-500" />
+            <ChevronDown className="h-4 w-4" />
           ) : (
-            <FolderIcon className="h-4 w-4 text-amber-500" />
+            <ChevronRight className="h-4 w-4" />
           )}
+          <FolderIcon className="h-4 w-4 text-amber-500" />
         </button>
 
         {isEditing && !isRoot ? (
           <div className="flex flex-1 items-center gap-2">
-            <Input
+            <input
               ref={titleInputRef}
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Title"
-              className="h-7 flex-1"
+              className="h-7 flex-1 rounded-md border bg-card px-2 text-sm outline-none focus:border-primary"
             />
             <Button
               type="button"
-              size="sm"
-              className="h-7 px-2"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={handleSave}
             >
-              Save
+              <Check className="h-3 w-3" />
             </Button>
             <Button
               type="button"
-              size="sm"
-              variant="outline"
-              className="h-7 px-2 bg-transparent"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
               onClick={handleCancel}
             >
-              Cancel
+              <X className="h-3 w-3" />
             </Button>
           </div>
         ) : (
-          /* Read-Only Folder Title */
           <button
             onClick={() => !isRoot && startEditing(folder.id)}
             className={cn(
@@ -184,19 +176,19 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
         )}
 
         {!isEditing && (
-          <>
+          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="h-6 w-6"
                   onClick={(e) => {
                     e.stopPropagation();
                     sortFolderContents(folder.id);
                   }}
                 >
-                  <ArrowDownAZ className="size-4 text-muted-foreground" />
+                  <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Sort by name</TooltipContent>
@@ -206,58 +198,57 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="h-6 w-6"
                   onClick={(e) => {
                     e.stopPropagation();
                     setAddFolderOpen(true);
                   }}
                 >
-                  <FolderPlus className="size-4 text-muted-foreground" />
+                  <FolderPlus className="h-3 w-3 text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Add folder</TooltipContent>
             </Tooltip>
-          </>
-        )}
-
-        {!isEditing && !isRoot && (
-          <>
-            <MoveToFolderDropdown item={folder}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <FolderInput className="size-4 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Move to folder</TooltipContent>
-              </Tooltip>
-            </MoveToFolderDropdown>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirmDeletions) {
-                      setDeleteDialogOpen(true);
-                    } else {
-                      removeBookmark(folder.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Delete</TooltipContent>
-            </Tooltip>
-          </>
+            {!isRoot && (
+              <>
+                <MoveToFolderDropdown item={folder}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoveRight className="h-3 w-3 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Move to folder</TooltipContent>
+                  </Tooltip>
+                </MoveToFolderDropdown>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirmDeletions) {
+                          setDeleteDialogOpen(true);
+                        } else {
+                          removeBookmark(folder.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete</TooltipContent>
+                </Tooltip>
+              </>
+            )}
+          </div>
         )}
       </div>
 

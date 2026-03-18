@@ -1,12 +1,13 @@
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { isFolder, type Bookmark, type Folder } from '@/types/bookmark';
 
 type DeleteDialogProps =
@@ -32,10 +33,10 @@ export default function DeleteDialog({
   onOpenChange,
   onConfirm,
 }: DeleteDialogProps) {
-  const isFolder = !!folder;
+  const isFolderItem = !!folder;
 
   const getDescription = () => {
-    if (!isFolder) {
+    if (!isFolderItem) {
       return 'This bookmark will be permanently deleted.';
     }
     const count = countDescendants(folder!);
@@ -46,29 +47,27 @@ export default function DeleteDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Delete {isFolder ? 'Folder' : 'Bookmark'}?</DialogTitle>
-          <DialogDescription>{getDescription()}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            autoFocus
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Delete {isFolderItem ? 'Folder' : 'Bookmark'}?
+          </AlertDialogTitle>
+          <AlertDialogDescription>{getDescription()}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-white hover:bg-destructive/90"
             onClick={() => {
               onConfirm();
-              onOpenChange(false);
             }}
           >
             Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
