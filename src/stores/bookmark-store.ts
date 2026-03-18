@@ -32,6 +32,10 @@ interface BookmarkState {
 
   // Settings
   settings: Settings;
+
+  // Expand/collapse all
+  allExpanded: boolean;
+  expandCollapseVersion: number;
 }
 
 interface BookmarkActions {
@@ -66,6 +70,9 @@ interface BookmarkActions {
 
   // Move to folder
   moveToFolder: (itemId: string, targetFolderId: string) => Promise<void>;
+
+  // Expand/collapse all
+  toggleExpandAll: () => void;
 
   // Settings
   updateSettings: (updates: Partial<Settings>) => Promise<void>;
@@ -117,7 +124,9 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   draggedBookmarkOrFolder: null,
   dragOverFolderId: null,
   hoveredId: null,
-  settings: { confirmDeletions: true, expandAllByDefault: true },
+  settings: { confirmDeletions: true },
+  allExpanded: true,
+  expandCollapseVersion: 0,
 
   // Data loading actions
   openPage: async () => {
@@ -126,9 +135,8 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
       const data = await fetchBookmarks();
       const settings = await loadSettings().catch(() => ({
         confirmDeletions: true,
-        expandAllByDefault: true,
       }));
-      set({ bookmarksOrFolders: data, settings, status: 'idle' });
+      set({ bookmarksOrFolders: data, settings, allExpanded: true, status: 'idle' });
     } catch (err) {
       set({
         status: 'error',
@@ -311,6 +319,15 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     } catch (err) {
       console.error('Failed to move bookmark:', err);
     }
+  },
+
+  // Expand/collapse all
+  toggleExpandAll: () => {
+    const { allExpanded, expandCollapseVersion } = get();
+    set({
+      allExpanded: !allExpanded,
+      expandCollapseVersion: expandCollapseVersion + 1,
+    });
   },
 
   // Settings actions

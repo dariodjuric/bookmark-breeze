@@ -8,7 +8,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useBookmarkKeyboardShortcuts } from '@/hooks/use-bookmark-keyboard-shortcuts';
 import { useBookmarkStore } from '@/stores/bookmark-store';
-import { Bookmark, Loader2 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Bookmark, ChevronsDownUp, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import BookmarkTree from './bookmark-tree';
 import ScanCard from './scan-card';
@@ -21,6 +26,8 @@ export default function MainPage() {
   const status = useBookmarkStore((state) => state.status);
   const error = useBookmarkStore((state) => state.error);
   const openPage = useBookmarkStore((state) => state.openPage);
+  const allExpanded = useBookmarkStore((state) => state.allExpanded);
+  const toggleExpandAll = useBookmarkStore((state) => state.toggleExpandAll);
 
   useEffect(() => {
     openPage();
@@ -53,6 +60,27 @@ export default function MainPage() {
         <CardHeader className="flex flex-row items-center gap-2 px-4 py-3">
           <Bookmark className="h-4 w-4 text-primary" />
           <CardTitle className="font-display text-base">Bookmarks</CardTitle>
+          <div className="ml-auto">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={toggleExpandAll}
+                >
+                  {allExpanded ? (
+                    <ChevronsDownUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {allExpanded ? 'Collapse all' : 'Expand all'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </CardHeader>
         <Separator />
         <CardContent className="p-2">

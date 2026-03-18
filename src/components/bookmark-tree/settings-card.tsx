@@ -13,9 +13,6 @@ export default function SettingsCard() {
   const confirmDeletions = useBookmarkStore(
     (state) => state.settings.confirmDeletions
   );
-  const expandAllByDefault = useBookmarkStore(
-    (state) => state.settings.expandAllByDefault
-  );
   const updateSettings = useBookmarkStore((state) => state.updateSettings);
 
   return (
@@ -37,23 +34,6 @@ export default function SettingsCard() {
             checked={confirmDeletions}
             onCheckedChange={(checked) =>
               updateSettings({ confirmDeletions: checked })
-            }
-          />
-        </label>
-        <Separator />
-        <label className="flex items-center justify-between cursor-pointer">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">
-              Expand folders by default
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Open all folders on load
-            </span>
-          </div>
-          <Switch
-            checked={expandAllByDefault}
-            onCheckedChange={(checked) =>
-              updateSettings({ expandAllByDefault: checked })
             }
           />
         </label>

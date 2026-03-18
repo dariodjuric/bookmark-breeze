@@ -22,7 +22,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import BookmarkNode from './bookmark-node';
 import AddFolderDialog from './dialogs/add-folder-dialog';
 import DeleteDialog from './dialogs/delete-dialog';
@@ -34,11 +34,18 @@ interface FolderNodeProps {
 }
 
 function FolderNode({ folder, depth }: FolderNodeProps) {
-  const expandAllByDefault = useBookmarkStore(
-    (state) => state.settings.expandAllByDefault
+  const allExpanded = useBookmarkStore((state) => state.allExpanded);
+  const expandCollapseVersion = useBookmarkStore(
+    (state) => state.expandCollapseVersion
   );
-  const [isExpanded, setExpanded] = useState(expandAllByDefault);
+  const [isExpanded, setExpanded] = useState(true);
   const [isAddFolderOpen, setAddFolderOpen] = useState(false);
+
+  useEffect(() => {
+    if (expandCollapseVersion > 0) {
+      setExpanded(allExpanded);
+    }
+  }, [expandCollapseVersion, allExpanded]);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const isDragOverThis = useBookmarkStore(
