@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,13 +22,6 @@ export default function AddFolderDialog({
 }: AddFolderDialogProps) {
   const [folderName, setFolderName] = useState('');
 
-  // Reset state when dialog opens
-  useEffect(() => {
-    if (open) {
-      setFolderName('');
-    }
-  }, [open]);
-
   const handleSubmit = () => {
     if (folderName.trim()) {
       onSubmit(folderName.trim());
@@ -46,7 +39,7 @@ export default function AddFolderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent key={String(open)} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>New Folder</DialogTitle>
         </DialogHeader>

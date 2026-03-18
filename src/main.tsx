@@ -3,10 +3,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import MainPage from './components/bookmark-tree/main-page';
 import { TooltipProvider } from './components/ui/tooltip';
-import { useBookmarkStore } from './stores/bookmark-store';
-import { isFolder } from './types/bookmark';
-import type { BookmarkOrFolder } from './types/bookmark';
 import './index.css';
+import { useBookmarkStore } from './stores/bookmark-store';
+import type { BookmarkOrFolder } from './types/bookmark';
+import { isFolder } from './types/bookmark';
 
 function countStats(items: BookmarkOrFolder[]): {
   folders: number;
@@ -65,7 +65,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <TooltipProvider>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-5xl px-4 py-5 flex flex-col gap-6">
+        <div className="container mx-auto max-w-6xl px-4 py-5 flex flex-col gap-6">
           <Header />
           <MainPage />
         </div>

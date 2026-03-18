@@ -28,7 +28,6 @@ export function mapChromeBookmark(
 export async function fetchBookmarks(): Promise<BookmarkOrFolder[]> {
   const tree = await chrome.bookmarks.getTree();
   // The root node (id "0") contains the main bookmark folders
-  // We return its children which are the top-level folders
   const rootChildren = tree[0]?.children || [];
   return rootChildren.map(mapChromeBookmark);
 }
@@ -96,8 +95,6 @@ export async function sortFolderByName(folderId: string): Promise<void> {
 
 // Check if a bookmark ID is a special Chrome root folder (cannot be edited/deleted)
 export function isRootFolder(id: string): boolean {
-  // "0" is the root, "1" is Bookmarks Bar, "2" is Other Bookmarks
-  // Some browsers also have "3" for Mobile Bookmarks
   return ['0', '1', '2', '3'].includes(id);
 }
 

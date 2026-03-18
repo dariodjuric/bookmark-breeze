@@ -22,7 +22,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import BookmarkNode from './bookmark-node';
 import AddFolderDialog from './dialogs/add-folder-dialog';
 import DeleteDialog from './dialogs/delete-dialog';
@@ -39,13 +39,14 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
     (state) => state.expandCollapseVersion
   );
   const [isExpanded, setExpanded] = useState(true);
-  const [isAddFolderOpen, setAddFolderOpen] = useState(false);
+  const [lastVersion, setLastVersion] = useState(expandCollapseVersion);
 
-  useEffect(() => {
-    if (expandCollapseVersion > 0) {
-      setExpanded(allExpanded);
-    }
-  }, [expandCollapseVersion, allExpanded]);
+  if (expandCollapseVersion !== lastVersion) {
+    setLastVersion(expandCollapseVersion);
+    setExpanded(allExpanded);
+  }
+
+  const [isAddFolderOpen, setAddFolderOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const isDragOverThis = useBookmarkStore(
@@ -126,8 +127,6 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
         onMouseEnter={() => hoverFolder(folder.id)}
         onMouseLeave={unhoverFolder}
       >
-        {isRoot && <div className="w-4" />}
-
         <button
           onClick={() => setExpanded(!isExpanded)}
           className="flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground"

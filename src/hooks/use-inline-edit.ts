@@ -3,6 +3,7 @@ import type { BookmarkOrFolder } from '@/types/bookmark';
 import { isBookmark } from '@/types/bookmark';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+
 interface UseInlineEditOptions {
   bookmarkOrFolder: BookmarkOrFolder;
   isRoot: boolean;
@@ -23,6 +24,16 @@ export function useInlineEdit({
     isBookmark(bookmarkOrFolder) ? bookmarkOrFolder.url : ''
   );
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const [prevIsEditing, setPrevIsEditing] = useState(false);
+
+  // Reset values when entering edit mode (set-state-during-render pattern)
+  if (isEditing && !prevIsEditing) {
+    setEditTitle(bookmarkOrFolder.title);
+    setEditUrl(isBookmark(bookmarkOrFolder) ? bookmarkOrFolder.url : '');
+  }
+  if (isEditing !== prevIsEditing) {
+    setPrevIsEditing(isEditing);
+  }
 
   // Focus input when entering edit mode
   useEffect(() => {
@@ -37,14 +48,6 @@ export function useInlineEdit({
       return () => clearTimeout(timer);
     }
   }, [isEditing]);
-
-  // Reset values when entering edit mode
-  useEffect(() => {
-    if (isEditing) {
-      setEditTitle(bookmarkOrFolder.title);
-      setEditUrl(isBookmark(bookmarkOrFolder) ? bookmarkOrFolder.url : '');
-    }
-  }, [isEditing, bookmarkOrFolder]);
 
   const handleSave = useCallback(() => {
     if (isRoot) {
