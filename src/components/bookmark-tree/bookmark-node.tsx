@@ -142,7 +142,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
             {isBroken && (
               <span className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive shrink-0">
                 <Link2Off className="h-3 w-3" />
-                May be broken
+                Needs review
               </span>
             )}
           </div>
