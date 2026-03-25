@@ -1,4 +1,3 @@
-import { Bookmark } from 'lucide-react';
 import MainPage from './components/bookmark-tree/main-page';
 import { TooltipProvider } from './components/ui/tooltip';
 import { useBookmarkStore } from './stores/bookmark-store';
@@ -46,9 +45,7 @@ function Header() {
   return (
     <div className="flex flex-col items-center justify-center gap-3">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-          <Bookmark className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <img src="/icon-128.png" alt="" className="h-10 w-10 rounded-xl" />
         <h1 className="font-display text-3xl font-bold text-foreground">
           Bookmark Breeze
         </h1>
@@ -61,7 +58,7 @@ function Header() {
           <span>
             {folders} folder{folders !== 1 ? 's' : ''}
           </span>
-          <span className="text-muted-foreground">·</span>
+          <span>·</span>
           <span>
             {bookmarks} bookmark{bookmarks !== 1 ? 's' : ''}
           </span>
