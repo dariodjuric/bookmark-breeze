@@ -8,8 +8,17 @@ import { useInlineEdit } from '@/hooks/use-inline-edit';
 import { getDepthPadding } from '@/lib/depth-calculation';
 import { cn } from '@/lib/tailwind';
 import { useBookmarkStore } from '@/stores/bookmark-store';
+import { useScanStore } from '@/stores/scan-store';
 import type { Bookmark } from '@/types/bookmark';
-import { Check, ExternalLink, Globe, MoveRight, Trash2, X } from 'lucide-react';
+import {
+  Check,
+  ExternalLink,
+  Globe,
+  Link2Off,
+  MoveRight,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { memo, useState } from 'react';
 import DeleteDialog from './dialogs/delete-dialog';
 import MoveToFolderDropdown from './move-to-folder-dropdown';
@@ -35,6 +44,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
   const confirmDeletions = useBookmarkStore(
     (state) => state.settings.confirmDeletions
   );
+  const isBroken = useScanStore((s) => s.brokenIds.has(bookmark.id));
 
   const {
     isEditing,
@@ -71,7 +81,12 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
         onMouseLeave={unhoverBookmark}
       >
         <div className="ml-[18px] flex items-center">
-          <Globe className="h-4 w-4 text-muted-foreground" />
+          <Globe
+            className={cn(
+              'h-4 w-4',
+              isBroken ? 'text-destructive' : 'text-muted-foreground'
+            )}
+          />
         </div>
 
         {isEditing ? (
@@ -124,19 +139,20 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
             >
               {bookmark.url}
             </button>
+            {isBroken && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive shrink-0">
+                <Link2Off className="h-3 w-3" />
+                May be broken
+              </span>
+            )}
           </div>
         )}
 
         {!isEditing && (
-          <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="ml-auto flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  asChild
-                >
+                <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
                   <a
                     href={bookmark.url}
                     target="_blank"
