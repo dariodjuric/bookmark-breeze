@@ -16,6 +16,13 @@ import type { BookmarkOrFolder, Folder } from '@/types/bookmark';
 import { isFolder } from '@/types/bookmark';
 import { create } from 'zustand';
 
+export type DropPosition = 'above' | 'below' | 'into';
+
+export interface DropIndicator {
+  targetId: string;
+  position: DropPosition;
+}
+
 interface BookmarkState {
   // Core data
   bookmarksOrFolders: BookmarkOrFolder[];
@@ -27,7 +34,7 @@ interface BookmarkState {
   // UI interaction states
   editingId: string | null;
   draggedBookmarkOrFolder: BookmarkOrFolder | null;
-  dragOverFolderId: string | null;
+  dropIndicator: DropIndicator | null;
   hoveredId: string | null;
 
   // Settings
@@ -59,9 +66,8 @@ interface BookmarkActions {
 
   // Drag & drop
   startDragging: (bookmarkOrFolder: BookmarkOrFolder) => void;
-  hoverDropTarget: (folderId: string) => void;
-  clearDropTarget: () => void;
-  dropIntoFolder: (targetFolderId: string) => Promise<void>;
+  setDropIndicator: (indicator: DropIndicator) => void;
+  commitDrop: () => Promise<void>;
   stopDragging: () => void;
 
   // Hover (for keyboard shortcuts)
@@ -115,6 +121,26 @@ const isDescendant = (parent: Folder, childId: string): boolean => {
   });
 };
 
+// Helper to find the index of a node within its parent's children
+const findIndexInParent = (
+  targetId: string,
+  topLevel: BookmarkOrFolder[]
+): number | null => {
+  for (let i = 0; i < topLevel.length; i++) {
+    const node = topLevel[i];
+    if (node.id === targetId) {
+      return i;
+    }
+    if (isFolder(node)) {
+      const result = findIndexInParent(targetId, node.children);
+      if (result !== null) {
+        return result;
+      }
+    }
+  }
+  return null;
+};
+
 export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   // Initial state
   bookmarksOrFolders: [],
@@ -122,7 +148,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   error: null,
   editingId: null,
   draggedBookmarkOrFolder: null,
-  dragOverFolderId: null,
+  dropIndicator: null,
   hoveredId: null,
   settings: { confirmDeletions: true },
   allExpanded: true,
@@ -234,56 +260,94 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     set({ draggedBookmarkOrFolder: bookmarkOrFolder });
   },
 
-  hoverDropTarget: (folderId) => {
-    const { draggedBookmarkOrFolder } = get();
-    if (draggedBookmarkOrFolder && draggedBookmarkOrFolder.id !== folderId) {
-      set({ dragOverFolderId: folderId });
+  setDropIndicator: (indicator) => {
+    const { draggedBookmarkOrFolder, dropIndicator } = get();
+    if (!draggedBookmarkOrFolder) {
+      return;
     }
-  },
-
-  clearDropTarget: () => {
-    set({ dragOverFolderId: null });
-  },
-
-  dropIntoFolder: async (targetFolderId) => {
-    const { draggedBookmarkOrFolder } = get();
-
+    if (draggedBookmarkOrFolder.id === indicator.targetId) {
+      return;
+    }
+    // Root folders can't be re-ordered (they live at parent "0")
     if (
-      !draggedBookmarkOrFolder ||
-      draggedBookmarkOrFolder.id === targetFolderId
+      (indicator.position === 'above' || indicator.position === 'below') &&
+      isRootFolder(indicator.targetId)
     ) {
-      set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
       return;
     }
-
-    if (isRootFolder(draggedBookmarkOrFolder.id)) {
-      set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
-      return;
-    }
-
-    // Prevent dropping a folder into itself or its descendants
+    // A folder can't land inside itself or its own descendants
     if (
       isFolder(draggedBookmarkOrFolder) &&
-      isDescendant(draggedBookmarkOrFolder, targetFolderId)
+      isDescendant(draggedBookmarkOrFolder, indicator.targetId)
     ) {
-      set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
+      return;
+    }
+    // Skip redundant updates so subscribers don't churn
+    if (
+      dropIndicator &&
+      dropIndicator.targetId === indicator.targetId &&
+      dropIndicator.position === indicator.position
+    ) {
+      return;
+    }
+    set({ dropIndicator: indicator });
+  },
+
+  commitDrop: async () => {
+    const { draggedBookmarkOrFolder, dropIndicator, bookmarksOrFolders } =
+      get();
+
+    set({ draggedBookmarkOrFolder: null, dropIndicator: null });
+
+    if (!draggedBookmarkOrFolder || !dropIndicator) {
+      return;
+    }
+    if (isRootFolder(draggedBookmarkOrFolder.id)) {
+      return;
+    }
+    if (draggedBookmarkOrFolder.id === dropIndicator.targetId) {
       return;
     }
 
     try {
-      await moveBookmark(draggedBookmarkOrFolder.id, {
-        parentId: targetFolderId,
-      });
+      if (dropIndicator.position === 'into') {
+        // Append into the target folder
+        await moveBookmark(draggedBookmarkOrFolder.id, {
+          parentId: dropIndicator.targetId,
+        });
+      } else {
+        const target = findBookmarkOrFolderById(
+          dropIndicator.targetId,
+          bookmarksOrFolders
+        );
+        if (!target || !target.parentId) {
+          return;
+        }
+        const targetIndex = findIndexInParent(
+          dropIndicator.targetId,
+          bookmarksOrFolders
+        );
+        if (targetIndex === null) {
+          return;
+        }
+        // Chrome's bookmarks.move auto-decrements the index when moving down
+        // within the same parent, so the math is the same for both same- and
+        // cross-parent moves: above => target's index, below => target's + 1
+        const insertIndex =
+          dropIndicator.position === 'above' ? targetIndex : targetIndex + 1;
+        await moveBookmark(draggedBookmarkOrFolder.id, {
+          parentId: target.parentId,
+          index: insertIndex,
+        });
+      }
       await get().refreshBookmarks();
     } catch (err) {
-      console.error('Failed to move bookmark:', err);
+      console.error('Failed to drop bookmark:', err);
     }
-
-    set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
   },
 
   stopDragging: () => {
-    set({ draggedBookmarkOrFolder: null, dragOverFolderId: null });
+    set({ draggedBookmarkOrFolder: null, dropIndicator: null });
   },
 
   // Hover actions

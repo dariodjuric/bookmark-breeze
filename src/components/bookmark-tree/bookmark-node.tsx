@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import DeleteDialog from './dialogs/delete-dialog';
+import DropLine from './drop-line';
 import MoveToFolderDropdown from './move-to-folder-dropdown';
 
 interface BookmarkNodeProps {
@@ -35,6 +36,19 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
   const removeBookmark = useBookmarkStore((state) => state.removeBookmark);
   const startDragging = useBookmarkStore((state) => state.startDragging);
   const stopDragging = useBookmarkStore((state) => state.stopDragging);
+  const setDropIndicator = useBookmarkStore((state) => state.setDropIndicator);
+  const commitDrop = useBookmarkStore((state) => state.commitDrop);
+  const dropPosition = useBookmarkStore((state) =>
+    state.dropIndicator?.targetId === bookmark.id
+      ? state.dropIndicator.position
+      : null
+  );
+  const isDragged = useBookmarkStore(
+    (state) => state.draggedBookmarkOrFolder?.id === bookmark.id
+  );
+  const isDragging = useBookmarkStore(
+    (state) => state.draggedBookmarkOrFolder !== null
+  );
   const hoverBookmark = useBookmarkStore(
     (state) => state.hoverBookmarkOrFolder
   );
@@ -66,16 +80,39 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
     e.dataTransfer.effectAllowed = 'move';
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offset = (e.clientY - rect.top) / rect.height;
+    setDropIndicator({
+      targetId: bookmark.id,
+      position: offset < 0.5 ? 'above' : 'below',
+    });
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    commitDrop();
+  };
+
   return (
-    <div className="select-none">
+    <div className="relative select-none">
+      {dropPosition === 'above' && <DropLine depth={depth} side="top" />}
+      {dropPosition === 'below' && <DropLine depth={depth} side="bottom" />}
       <div
         className={cn(
-          'group flex items-center gap-1 rounded-md px-2 py-1.5 transition-colors',
-          'hover:bg-accent'
+          'group relative flex items-center gap-1 rounded-md px-2 py-1.5 transition-all',
+          'hover:bg-accent',
+          isDragged && 'opacity-40',
+          !isEditing && 'cursor-grab active:cursor-grabbing',
+          isDragging && 'transition-none'
         )}
         style={{ paddingLeft: getDepthPadding(depth) }}
         draggable={!isEditing}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         onDragEnd={stopDragging}
         onMouseEnter={() => hoverBookmark(bookmark.id)}
         onMouseLeave={unhoverBookmark}

@@ -26,6 +26,7 @@ import { memo, useState } from 'react';
 import BookmarkNode from './bookmark-node';
 import AddFolderDialog from './dialogs/add-folder-dialog';
 import DeleteDialog from './dialogs/delete-dialog';
+import DropLine from './drop-line';
 import MoveToFolderDropdown from './move-to-folder-dropdown';
 
 interface FolderNodeProps {
@@ -49,8 +50,16 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
   const [isAddFolderOpen, setAddFolderOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const isDragOverThis = useBookmarkStore(
-    (state) => state.dragOverFolderId === folder.id
+  const dropPosition = useBookmarkStore((state) =>
+    state.dropIndicator?.targetId === folder.id
+      ? state.dropIndicator.position
+      : null
+  );
+  const isDragged = useBookmarkStore(
+    (state) => state.draggedBookmarkOrFolder?.id === folder.id
+  );
+  const isDragging = useBookmarkStore(
+    (state) => state.draggedBookmarkOrFolder !== null
   );
   const startEditing = useBookmarkStore((state) => state.startEditing);
   const removeBookmark = useBookmarkStore((state) => state.removeBookmark);
@@ -59,9 +68,8 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
     (state) => state.sortFolderContents
   );
   const startDragging = useBookmarkStore((state) => state.startDragging);
-  const hoverDropTarget = useBookmarkStore((state) => state.hoverDropTarget);
-  const clearDropTarget = useBookmarkStore((state) => state.clearDropTarget);
-  const dropIntoFolder = useBookmarkStore((state) => state.dropIntoFolder);
+  const setDropIndicator = useBookmarkStore((state) => state.setDropIndicator);
+  const commitDrop = useBookmarkStore((state) => state.commitDrop);
   const stopDragging = useBookmarkStore((state) => state.stopDragging);
   const hoverFolder = useBookmarkStore((state) => state.hoverBookmarkOrFolder);
   const unhoverFolder = useBookmarkStore(
@@ -97,32 +105,47 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    hoverDropTarget(folder.id);
+    e.dataTransfer.dropEffect = 'move';
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offset = (e.clientY - rect.top) / rect.height;
+    // Root folders can't be re-ordered, so the entire row is an "into" zone
+    let position: 'above' | 'into' | 'below';
+    if (isRoot) {
+      position = 'into';
+    } else if (offset < 0.25) {
+      position = 'above';
+    } else if (offset > 0.75) {
+      position = 'below';
+    } else {
+      position = 'into';
+    }
+    setDropIndicator({ targetId: folder.id, position });
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    dropIntoFolder(folder.id);
-  };
-
-  const handleDragLeave = () => {
-    clearDropTarget();
+    commitDrop();
   };
 
   return (
-    <div className="select-none">
+    <div className="relative select-none">
+      {dropPosition === 'above' && <DropLine depth={depth} side="top" />}
+      {dropPosition === 'below' && <DropLine depth={depth} side="bottom" />}
       <div
         className={cn(
-          'group flex items-center gap-1 rounded-md px-2 py-1.5 transition-colors',
+          'group relative flex items-center gap-1 rounded-md px-2 py-1.5 transition-all',
           'hover:bg-accent',
-          isDragOverThis && 'bg-accent ring-2 ring-primary'
+          dropPosition === 'into' &&
+            'bg-accent ring-2 ring-primary ring-offset-1 ring-offset-card',
+          isDragged && 'opacity-40',
+          !isEditing && !isRoot && 'cursor-grab active:cursor-grabbing',
+          isDragging && 'transition-none'
         )}
         style={{ paddingLeft: getDepthPadding(depth) }}
         draggable={!isEditing && !isRoot}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onDragLeave={handleDragLeave}
         onDragEnd={stopDragging}
         onMouseEnter={() => hoverFolder(folder.id)}
         onMouseLeave={unhoverFolder}
