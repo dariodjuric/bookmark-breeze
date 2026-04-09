@@ -172,7 +172,7 @@ function BookmarkNode({ bookmark, depth }: BookmarkNodeProps) {
             </button>
             <button
               onClick={() => startEditing(bookmark.id)}
-              className="truncate max-w-96 text-xs text-muted-foreground cursor-pointer hover:underline"
+              className="truncate max-w-80 text-xs text-muted-foreground cursor-pointer hover:underline"
             >
               {bookmark.url}
             </button>

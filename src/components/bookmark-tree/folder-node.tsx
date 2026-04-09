@@ -39,7 +39,7 @@ function FolderNode({ folder, depth }: FolderNodeProps) {
   const expandCollapseVersion = useBookmarkStore(
     (state) => state.expandCollapseVersion
   );
-  const [isExpanded, setExpanded] = useState(true);
+  const [isExpanded, setExpanded] = useState(allExpanded);
   const [lastVersion, setLastVersion] = useState(expandCollapseVersion);
 
   if (expandCollapseVersion !== lastVersion) {
