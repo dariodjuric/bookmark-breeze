@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BookmarkTree from './bookmark-tree';
+import FeedbackNote from './feedback-note';
 import ScanCard from './scan-card';
 import SettingsCard from './settings-card';
 
@@ -149,6 +150,7 @@ export default function MainPage() {
       <div className="w-72 shrink-0 space-y-4">
         <SettingsCard />
         <ScanCard />
+        <FeedbackNote />
       </div>
     </div>
   );
