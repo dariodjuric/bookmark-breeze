@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Bookmark Breeze",
+  "name": "Bookmark Breeze: Bookmark Manager & Cleaner",
   "version": "1.2.0",
   "description": "Curate your links at lightning speed.",
   "permissions": ["bookmarks", "storage"],
