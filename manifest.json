@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bookmark Breeze: Bookmark Manager & Cleaner",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Organize, edit and clean your bookmarks fast. 1-click edit, delete and move, plus bulk scanning to find broken bookmarks.",
   "permissions": ["bookmarks", "storage"],
   "optional_host_permissions": ["<all_urls>"],
