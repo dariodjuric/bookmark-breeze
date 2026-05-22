@@ -43,6 +43,32 @@ pnpm lint     # Run ESLint
 pnpm format   # Format code with Prettier
 ```
 
+## Releasing
+
+Releases are handled by `make-release.sh`, which bumps the version, commits, tags, and builds the packaged zip.
+
+1. Commit or stash all changes — the script aborts if the working directory is not clean.
+2. Run the script with the version bump type:
+
+   ```bash
+   ./make-release.sh patch   # or minor, or major
+   ```
+
+   This will:
+   - Bump the version in `package.json` and `manifest.json`
+   - Commit the bump as `Release vX.Y.Z` and create a `vX.Y.Z` git tag
+   - Run `pnpm zip`, which builds the extension (`pnpm build`) and packages `dist/` into `package.zip`
+
+3. Push the commit and tag:
+
+   ```bash
+   git push && git push --tags
+   ```
+
+4. Upload `package.zip` to the Chrome Web Store.
+
+You do not need to run `pnpm build` or `pnpm zip` yourself — `make-release.sh` runs the build as part of packaging.
+
 ## Tech Stack
 
 - React 18
