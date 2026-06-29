@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useBookmarkKeyboardShortcuts } from '@/hooks/use-bookmark-keyboard-shortcuts';
+import { useBookmarkSync } from '@/hooks/use-bookmark-sync';
 import { useBookmarkStore } from '@/stores/bookmark-store';
 import type { BookmarkOrFolder } from '@/types/bookmark';
 import { isBookmark, isFolder } from '@/types/bookmark';
@@ -56,6 +57,7 @@ export default function MainPage() {
   }, [openPage]);
 
   useBookmarkKeyboardShortcuts();
+  useBookmarkSync();
 
   if (status === 'loading') {
     return (

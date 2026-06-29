@@ -98,6 +98,26 @@ export function isRootFolder(id: string): boolean {
   return ['0', '1', '2', '3'].includes(id);
 }
 
+// Subscribe to external bookmark changes (e.g. made in another tab or the
+// native bookmark manager). Returns an unsubscribe function.
+export function subscribeToBookmarkChanges(onChange: () => void): () => void {
+  const handler = () => onChange();
+  chrome.bookmarks.onCreated.addListener(handler);
+  chrome.bookmarks.onChanged.addListener(handler);
+  chrome.bookmarks.onRemoved.addListener(handler);
+  chrome.bookmarks.onMoved.addListener(handler);
+  chrome.bookmarks.onChildrenReordered.addListener(handler);
+  chrome.bookmarks.onImportEnded.addListener(handler);
+  return () => {
+    chrome.bookmarks.onCreated.removeListener(handler);
+    chrome.bookmarks.onChanged.removeListener(handler);
+    chrome.bookmarks.onRemoved.removeListener(handler);
+    chrome.bookmarks.onMoved.removeListener(handler);
+    chrome.bookmarks.onChildrenReordered.removeListener(handler);
+    chrome.bookmarks.onImportEnded.removeListener(handler);
+  };
+}
+
 // Get the display name for root folders
 export function getRootFolderName(id: string): string {
   switch (id) {
